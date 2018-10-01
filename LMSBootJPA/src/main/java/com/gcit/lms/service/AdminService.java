@@ -20,14 +20,18 @@ import com.gcit.lms.entity.BookAuthorID;
 import com.gcit.lms.entity.BookGenre;
 import com.gcit.lms.entity.BookGenreID;
 import com.gcit.lms.entity.BookLoan;
+import com.gcit.lms.entity.Borrower;
 import com.gcit.lms.entity.Genre;
+import com.gcit.lms.entity.LibBranch;
 import com.gcit.lms.entity.Publisher;
 import com.gcit.lms.repositories.AuthorRepository;
 import com.gcit.lms.repositories.BookAuthorRepository;
 import com.gcit.lms.repositories.BookGenreRepository;
 import com.gcit.lms.repositories.BookLoanRepository;
 import com.gcit.lms.repositories.BookRepository;
+import com.gcit.lms.repositories.BorrowerRepository;
 import com.gcit.lms.repositories.GenreRepository;
+import com.gcit.lms.repositories.LibraryBranchRepository;
 import com.gcit.lms.repositories.PublisherRepository;
 
 @RestController
@@ -53,6 +57,12 @@ public class AdminService {
 	
 	@Autowired
 	GenreRepository genreRepo;
+	
+	@Autowired
+	LibraryBranchRepository branchRepo;
+	
+	@Autowired
+	BorrowerRepository borrowRepo;
 
 	@RequestMapping(value = "/lms/addNewBook", method = RequestMethod.POST, consumes = "application/json")	
 	public void addBook(@RequestBody Book book) {
@@ -149,7 +159,7 @@ public class AdminService {
 	}
 	
 	@RequestMapping(value = "/lms/updatePublisher", method = RequestMethod.POST, consumes = "application/json")
-	public String saveAuthor(@RequestBody Publisher publisher) {
+	public String savePublisher(@RequestBody Publisher publisher) {
 		String returnString = "";
 		try {
 			
@@ -253,6 +263,96 @@ public class AdminService {
 			e.printStackTrace();
 		}
 		return returnString;
+	}
+	
+	@RequestMapping(value = "/lms/updateBook", method = RequestMethod.POST, consumes = "application/json")
+	public String updateBook(@RequestBody Book book) {
+		String returnString = "";
+		try {
+			
+			if (book.getBookId() != null && book.getTitle() != null) {
+				bookRepo.saveAndFlush(book);
+				returnString = "Book updated sucessfully";
+			} else if (book.getBookId() != null) {
+				bookRepo.deleteById(book.getBookId());
+				returnString = "Book deleted sucessfully";
+			} 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return returnString;
+	}
+	
+	@RequestMapping(value = "/lms/updateLibBranch", method = RequestMethod.POST, consumes = "application/json")
+	public String saveLibBranch(@RequestBody LibBranch branch) {
+		String returnString = "";
+		try {
+			
+			if (branch.getBranchId() != null && branch.getBranchName() != null) {
+				branchRepo.saveAndFlush(branch);
+				returnString = "LibBranch updated sucessfully";
+			} else if (branch.getBranchId() != null) {
+				branchRepo.deleteById(branch.getBranchId());
+				returnString = "LibBranch deleted sucessfully";
+			} else {
+				branchRepo.saveAndFlush(branch);
+				returnString = "LibBranch saved sucessfully";
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return returnString;
+	}
+	
+	@RequestMapping(value = "/lms/readLibBranchs", method = RequestMethod.GET, produces = "application/json")
+	public List<LibBranch> readLibBranchs(@RequestParam String searchString) {		
+		try {
+			if (!searchString.isEmpty()) {
+				return branchRepo.readLibraryBranchByName(searchString);
+				
+			}else {
+				return branchRepo.findAll();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	@RequestMapping(value = "/lms/updateborrower", method = RequestMethod.POST, consumes = "application/json")
+	public String saveborrower(@RequestBody Borrower borrower) {
+		String returnString = "";
+		try {
+			
+			if (borrower.getCardNo() != null && borrower.getName() != null) {
+				borrowRepo.saveAndFlush(borrower);
+				returnString = "borrower updated sucessfully";
+			} else if (borrower.getCardNo() != null) {
+				borrowRepo.deleteById(borrower.getCardNo());
+				returnString = "borrower deleted sucessfully";
+			} else {
+				borrowRepo.saveAndFlush(borrower);
+				returnString = "borrower saved sucessfully";
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return returnString;
+	}
+	
+	@RequestMapping(value = "/lms/readborrowers", method = RequestMethod.GET, produces = "application/json")
+	public List<Borrower> readborrowers(@RequestParam String searchString) {		
+		try {
+			if (!searchString.isEmpty()) {
+				return borrowRepo.readBorrowersByName(searchString);
+				
+			}else {
+				return borrowRepo.findAll();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 }
